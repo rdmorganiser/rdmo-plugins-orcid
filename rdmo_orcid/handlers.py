@@ -29,9 +29,8 @@ def value_handler(sender, request=None, instance=None, **kwargs):
             # query the orcid api for the record for this orcid
             try:
                 url = getattr(settings, 'ORCID_PROVIDER_URL', 'https://pub.orcid.org/v3.0/').rstrip('/')
-                headers = getattr(settings, 'GND_PROVIDER_HEADERS', {
-                    'Accept': 'application/json'
-                })
+                headers = getattr(settings, 'ORCID_PROVIDER_HEADERS', {})
+                headers['Accept'] = 'application/json'
 
                 response = requests.get(f'{url}/{instance.external_id}', headers=headers)
                 response.raise_for_status()

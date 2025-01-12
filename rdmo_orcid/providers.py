@@ -15,9 +15,8 @@ class OrcidProvider(Provider):
     def get_options(self, project, search=None, user=None, site=None):
         if search:
             url = getattr(settings, 'ORCID_PROVIDER_URL', 'https://pub.orcid.org/v3.0/').rstrip('/')
-            headers = getattr(settings, 'GND_PROVIDER_HEADERS', {
-                'Accept': 'application/json'
-            })
+            headers = getattr(settings, 'ORCID_PROVIDER_HEADERS', {})
+            headers['Accept'] = 'application/json'
 
             response = requests.get(url + '/expanded-search/', params={
                 'q': self.get_search(search),
