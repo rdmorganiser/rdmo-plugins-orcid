@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdmo xmlns:dc="http://purl.org/dc/elements/1.1/" created="2025-01-12T11:31:02.261967+01:00" version="2.2.0.dev1">
+	<catalog dc:uri="https://rdmorganiser.github.io/terms/questions/orcid">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid</uri_path>
+		<dc:comment/>
+		<order>0</order>
+		<title lang="en">ORCID</title>
+		<help lang="en"/>
+		<title lang="de">ORCID</title>
+		<help lang="de"/>
+		<title lang="fr"/>
+		<help lang="fr"/>
+		<title lang="it"/>
+		<help lang="it"/>
+		<title lang="es"/>
+		<help lang="es"/>
+		<sections>
+			<section dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset" order="1"/>
+		</sections>
+	</catalog>
+	<section dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset</uri_path>
+		<dc:comment/>
+		<title lang="en">Datasets</title>
+		<short_title lang="en"/>
+		<title lang="de">Datensätze</title>
+		<short_title lang="de"/>
+		<title lang="fr"/>
+		<short_title lang="fr"/>
+		<title lang="it"/>
+		<short_title lang="it"/>
+		<title lang="es"/>
+		<short_title lang="es"/>
+		<pages>
+			<page dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creator" order="1"/>
+		</pages>
+	</section>
+	<page dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creator">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset/creator</uri_path>
+		<dc:comment/>
+		<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/id"/>
+		<is_collection>True</is_collection>
+		<title lang="en">Creators</title>
+		<short_title lang="en"/>
+		<help lang="en"/>
+		<verbose_name lang="en"/>
+		<title lang="de">Erstellende</title>
+		<short_title lang="de"/>
+		<help lang="de"/>
+		<verbose_name lang="de"/>
+		<title lang="fr"/>
+		<short_title lang="fr"/>
+		<help lang="fr"/>
+		<verbose_name lang="fr"/>
+		<title lang="it"/>
+		<short_title lang="it"/>
+		<help lang="it"/>
+		<verbose_name lang="it"/>
+		<title lang="es"/>
+		<short_title lang="es"/>
+		<help lang="es"/>
+		<verbose_name lang="es"/>
+		<questionsets>
+			<questionset dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator" order="0"/>
+		</questionsets>
+		<questions/>
+		<conditions/>
+	</page>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/id">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>id</key>
+		<path>project/dataset/id</path>
+		<dc:comment>Short ID for a dataset, used as questionset attribute for dataset related questionsets.</dc:comment>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset"/>
+	</attribute>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>dataset</key>
+		<path>project/dataset</path>
+		<dc:comment/>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project"/>
+	</attribute>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>project</key>
+		<path>project</path>
+		<dc:comment/>
+		<parent/>
+	</attribute>
+	<questionset dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset/creators/creator</uri_path>
+		<dc:comment/>
+		<attribute/>
+		<is_collection>True</is_collection>
+		<title lang="en">Creator</title>
+		<help lang="en"/>
+		<verbose_name lang="en"/>
+		<title lang="de">Ersteller:in</title>
+		<help lang="de"/>
+		<verbose_name lang="de"/>
+		<title lang="fr"/>
+		<help lang="fr"/>
+		<verbose_name lang="fr"/>
+		<title lang="it"/>
+		<help lang="it"/>
+		<verbose_name lang="it"/>
+		<title lang="es"/>
+		<help lang="es"/>
+		<verbose_name lang="es"/>
+		<questionsets/>
+		<questions>
+			<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/orcid" order="0"/>
+			<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/given_name" order="1"/>
+			<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/family_name" order="2"/>
+			<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/affiliation" order="3"/>
+		</questions>
+		<conditions/>
+	</questionset>
+	<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/orcid">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset/creators/creator/orcid</uri_path>
+		<dc:comment/>
+		<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/orcid"/>
+		<is_collection>False</is_collection>
+		<is_optional>False</is_optional>
+		<help lang="en"/>
+		<text lang="en">ORCID</text>
+		<default_text lang="en"/>
+		<verbose_name lang="en"/>
+		<help lang="de"/>
+		<text lang="de"/>
+		<default_text lang="de"/>
+		<verbose_name lang="de"/>
+		<help lang="fr"/>
+		<text lang="fr"/>
+		<default_text lang="fr"/>
+		<verbose_name lang="fr"/>
+		<help lang="it"/>
+		<text lang="it"/>
+		<default_text lang="it"/>
+		<verbose_name lang="it"/>
+		<help lang="es"/>
+		<text lang="es"/>
+		<default_text lang="es"/>
+		<verbose_name lang="es"/>
+		<default_option/>
+		<default_external_id/>
+		<widget_type>select</widget_type>
+		<value_type>text</value_type>
+		<maximum/>
+		<minimum/>
+		<step/>
+		<unit/>
+		<width/>
+		<optionsets>
+			<optionset dc:uri="https://rdmorganiser.github.io/terms/options/orcid"/>
+		</optionsets>
+		<conditions/>
+	</question>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/orcid">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>orcid</key>
+		<path>project/dataset/creator/orcid</path>
+		<dc:comment/>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator"/>
+	</attribute>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>creator</key>
+		<path>project/dataset/creator</path>
+		<dc:comment/>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset"/>
+	</attribute>
+	<optionset dc:uri="https://rdmorganiser.github.io/terms/options/orcid">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid</uri_path>
+		<dc:comment/>
+		<provider_key>orcid</provider_key>
+		<options/>
+		<conditions/>
+	</optionset>
+	<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/given_name">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset/creators/creator/given_name</uri_path>
+		<dc:comment/>
+		<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/given_name"/>
+		<is_collection>False</is_collection>
+		<is_optional>False</is_optional>
+		<help lang="en"/>
+		<text lang="en">Given name</text>
+		<default_text lang="en"/>
+		<verbose_name lang="en"/>
+		<help lang="de"/>
+		<text lang="de"/>
+		<default_text lang="de"/>
+		<verbose_name lang="de"/>
+		<help lang="fr"/>
+		<text lang="fr"/>
+		<default_text lang="fr"/>
+		<verbose_name lang="fr"/>
+		<help lang="it"/>
+		<text lang="it"/>
+		<default_text lang="it"/>
+		<verbose_name lang="it"/>
+		<help lang="es"/>
+		<text lang="es"/>
+		<default_text lang="es"/>
+		<verbose_name lang="es"/>
+		<default_option/>
+		<default_external_id/>
+		<widget_type>text</widget_type>
+		<value_type>text</value_type>
+		<maximum/>
+		<minimum/>
+		<step/>
+		<unit/>
+		<width>6</width>
+		<optionsets/>
+		<conditions/>
+	</question>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/given_name">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>given_name</key>
+		<path>project/dataset/creator/given_name</path>
+		<dc:comment/>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator"/>
+	</attribute>
+	<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/family_name">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset/creators/creator/family_name</uri_path>
+		<dc:comment/>
+		<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/family_name"/>
+		<is_collection>False</is_collection>
+		<is_optional>False</is_optional>
+		<help lang="en"/>
+		<text lang="en">Family name</text>
+		<default_text lang="en"/>
+		<verbose_name lang="en"/>
+		<help lang="de"/>
+		<text lang="de"/>
+		<default_text lang="de"/>
+		<verbose_name lang="de"/>
+		<help lang="fr"/>
+		<text lang="fr"/>
+		<default_text lang="fr"/>
+		<verbose_name lang="fr"/>
+		<help lang="it"/>
+		<text lang="it"/>
+		<default_text lang="it"/>
+		<verbose_name lang="it"/>
+		<help lang="es"/>
+		<text lang="es"/>
+		<default_text lang="es"/>
+		<verbose_name lang="es"/>
+		<default_option/>
+		<default_external_id/>
+		<widget_type>text</widget_type>
+		<value_type>text</value_type>
+		<maximum/>
+		<minimum/>
+		<step/>
+		<unit/>
+		<width>6</width>
+		<optionsets/>
+		<conditions/>
+	</question>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/family_name">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>family_name</key>
+		<path>project/dataset/creator/family_name</path>
+		<dc:comment/>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator"/>
+	</attribute>
+	<question dc:uri="https://rdmorganiser.github.io/terms/questions/orcid/dataset/creators/creator/affiliation">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<uri_path>orcid/dataset/creators/creator/affiliation</uri_path>
+		<dc:comment/>
+		<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/affiliation"/>
+		<is_collection>True</is_collection>
+		<is_optional>False</is_optional>
+		<help lang="en"/>
+		<text lang="en">Affiliation</text>
+		<default_text lang="en"/>
+		<verbose_name lang="en"/>
+		<help lang="de"/>
+		<text lang="de"/>
+		<default_text lang="de"/>
+		<verbose_name lang="de"/>
+		<help lang="fr"/>
+		<text lang="fr"/>
+		<default_text lang="fr"/>
+		<verbose_name lang="fr"/>
+		<help lang="it"/>
+		<text lang="it"/>
+		<default_text lang="it"/>
+		<verbose_name lang="it"/>
+		<help lang="es"/>
+		<text lang="es"/>
+		<default_text lang="es"/>
+		<verbose_name lang="es"/>
+		<default_option/>
+		<default_external_id/>
+		<widget_type>text</widget_type>
+		<value_type>text</value_type>
+		<maximum/>
+		<minimum/>
+		<step/>
+		<unit/>
+		<width/>
+		<optionsets/>
+		<conditions/>
+	</question>
+	<attribute dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator/affiliation">
+		<uri_prefix>https://rdmorganiser.github.io/terms</uri_prefix>
+		<key>affiliation</key>
+		<path>project/dataset/creator/affiliation</path>
+		<dc:comment/>
+		<parent dc:uri="https://rdmorganiser.github.io/terms/domain/project/dataset/creator"/>
+	</attribute>
+</rdmo>
