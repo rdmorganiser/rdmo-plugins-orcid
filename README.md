@@ -41,3 +41,11 @@ ORCID_PROVIDER_MAP = [
 ```
 
 In this case, a change to the identifier of a coordinator (`https://rdmorganiser.github.io/terms/domain/project/dataset/creator/orcid`) will update their name (`https://rdmorganiser.github.io/terms/domain/project/dataset/creator/given_name`) automatically. `ORCID_PROVIDER_MAP` is a list of mappings, since multiple ORCIDiD could be used and should update different other values. The question for `affiliation` should be a collection since ORCID will often return one than more current affiliation.
+
+While not required, you can add a custom `User-Agent` to your requests so that the provider can perform statistical analyses and, if you add an email address, might contact you. This can be done by adding the following to your settings.
+
+```python
+ORCID_PROVIDER_HEADERS = {
+    'User-Agent': 'rdmo.example.com/1.0 (mail@rdmo.example.com) rdmo-plugins-orcid/1.0'
+}
+```
