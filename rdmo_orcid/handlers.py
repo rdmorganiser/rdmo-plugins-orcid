@@ -86,5 +86,7 @@ def value_handler(sender, request=None, instance=None, **kwargs):
                 Value.objects.filter(
                     project=instance.project,
                     snapshot=None,
+                    set_prefix=instance.set_prefix,
+                    set_index=instance.set_index,
                     attribute=attribute
                 ).exclude(collection_index__in=range(len(affiliations))).delete()
