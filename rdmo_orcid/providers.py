@@ -1,6 +1,7 @@
 import re
 
 from django.conf import settings
+from django.templatetags.static import static
 
 import requests
 
@@ -41,11 +42,13 @@ class OrcidProvider(Provider):
         return []
 
     def get_text(self, item):
-        text = '{given-names} {family-names}'.format(**item)
+        orcid_id = item['orcid-id']
+        orcid_img = static('accounts/img/orcid_16x16.png')
+        orcid_link = f'<a href="https://orcid.org/{orcid_id}"><img src="{orcid_img}" alt="orcid logo" /></a>'
+        text = '{given-names} {family-names} {orcid_link}'.format(**item, orcid_link=orcid_link)
         if item.get('institution-name'):
-            institutions = ', '.join(item['institution-name'])
+            institutions = ', '.join(item['institution-name'][:2])
             text += f' ({institutions})'
-        text += ' [{orcid-id}]'.format(**item)
         return text
 
     def get_search(self, search):
