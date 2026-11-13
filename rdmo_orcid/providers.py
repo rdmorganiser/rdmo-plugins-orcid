@@ -16,7 +16,6 @@ class OrcidProvider(Provider):
         if search:
             url = getattr(settings, 'ORCID_PROVIDER_URL', 'https://pub.orcid.org/v3.0/').rstrip('/')
             headers = getattr(settings, 'ORCID_PROVIDER_HEADERS', {})
-            headers['Accept'] = 'application/json'
 
             response = requests.get(
                 url + '/expanded-search/',
@@ -25,7 +24,7 @@ class OrcidProvider(Provider):
                     'start': 0,
                     'rows': 10,
                 },
-                headers=headers,
+                headers={**headers, 'Accept': 'application/json'},
             )
 
             try:

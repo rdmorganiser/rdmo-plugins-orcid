@@ -18,10 +18,6 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
     if not getattr(settings, 'ORCID_PROVIDER_MAP', None):
         return
 
-    # check if we are importing fixtures
-    if kwargs.get('raw'):
-        return
-
     # check if this value instance has an external_id or has an attribute (it may have been deleted)
     if not instance.external_id or not instance.attribute_id:
         return
@@ -33,13 +29,15 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
             try:
                 url = getattr(settings, 'ORCID_PROVIDER_URL', 'https://pub.orcid.org/v3.0/').rstrip('/')
                 headers = getattr(settings, 'ORCID_PROVIDER_HEADERS', {})
-                headers['Accept'] = 'application/json'
 
-                response = requests.get(f'{url}/{instance.external_id}', headers=headers)
+                response = requests.get(
+                    f'{url}/{instance.external_id}',
+                    headers={**headers, 'Accept': 'application/json'},
+                )
                 response.raise_for_status()
 
                 data = response.json()
-            except (requests.exceptions.RequestException, requests.exceptions.HTTPError):
+            except requests.exceptions.RequestException:
                 return
 
             # prefetch catalog
@@ -56,11 +54,11 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
                         Value.objects.update_or_create(
                             project=instance.project,
                             snapshot=None,
-                            attribute=Attribute.objects.get(uri=attribute_map['given_name']),
+                            attribute=attribute,
                             set_prefix=value_set.get('set_prefix'),
                             set_index=value_set.get('set_index'),
                             defaults={
-                                'text': dpath.get(data, '/person/name/given-names/value'),
+                                'text': dpath.get(data, '/person/name/given-names/value', default=''),
                             },
                         )
 
@@ -71,11 +69,11 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
                         Value.objects.update_or_create(
                             project=instance.project,
                             snapshot=None,
-                            attribute=Attribute.objects.get(uri=attribute_map['family_name']),
+                            attribute=attribute,
                             set_prefix=value_set.get('set_prefix'),
                             set_index=value_set.get('set_index'),
                             defaults={
-                                'text': dpath.get(data, '/person/name/family-name/value'),
+                                'text': dpath.get(data, '/person/name/family-name/value', default=''),
                             },
                         )
 
@@ -95,6 +93,10 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
 def save_affiliation_values(instance, catalog, answer_tree, attribute, question, texts):
     parent = find_parent(catalog, question)
 
+    # if the orcid question is inside the parent, the sets of the parent belong to different persons
+    orcid_question = find_question(catalog, instance.attribute)
+    create_parent_sets = parent and parent.is_collection and orcid_question not in parent.descendants
+
     if question.is_collection:
         # the question is a collection: every affiliation gets its own collection_index
         if value_set := find_set(answer_tree, question, instance):
@@ -112,7 +114,7 @@ def save_affiliation_values(instance, catalog, answer_tree, attribute, question,
                         },
                     )
 
-            # delete surplus collection_indexes
+            # delete the values for this attribute with surplus collection_indexes or without a text
             Value.objects.filter(
                 project=instance.project,
                 snapshot=None,
@@ -120,25 +122,37 @@ def save_affiliation_values(instance, catalog, answer_tree, attribute, question,
                 set_index=value_set.get('set_index'),
                 attribute=attribute,
             ).exclude(
-                collection_index__in=range(len(texts)),
+                collection_index__in=[collection_index for collection_index, text in enumerate(texts) if text],
             ).delete()
 
-    elif parent and parent.is_collection:
+    elif create_parent_sets:
         # the parent is a collection: every affiliation gets its own set of the parent,
         # we look for the set containing the parent, since the parent might not have any sets yet
         if value_set := find_set(answer_tree, parent, instance):
+            set_prefix = get_child_prefix(value_set)
+
             for set_index, text in enumerate(texts):
                 if text:
                     Value.objects.update_or_create(
                         project=instance.project,
                         snapshot=None,
                         attribute=attribute,
-                        set_prefix=get_child_prefix(value_set),
+                        set_prefix=set_prefix,
                         set_index=set_index,
                         defaults={
                             'text': text,
                         },
                     )
+
+            # delete the values for this attribute in surplus sets or in sets without a text
+            Value.objects.filter(
+                project=instance.project,
+                snapshot=None,
+                set_prefix=set_prefix,
+                attribute=attribute,
+            ).exclude(
+                set_index__in=[set_index for set_index, text in enumerate(texts) if text],
+            ).delete()
 
     else:
         # neither is a collection: only the first affiliation is stored
@@ -158,22 +172,22 @@ def save_affiliation_values(instance, catalog, answer_tree, attribute, question,
 
 def get_affiliation_names(data):
     affiliations = []
-    for affiliation in dpath.get(data, '/activities-summary/employments/affiliation-group'):
+    for affiliation in dpath.get(data, '/activities-summary/employments/affiliation-group', default=[]):
         for summary in affiliation.get('summaries'):
-            if dpath.get(summary, '/employment-summary/end-date') is None:
+            if dpath.get(summary, '/employment-summary/end-date', default=None) is None:
                 affiliations.append(get_affiliation_name(summary))
     return affiliations
 
 
 def get_affiliation_name(summary):
-    return dpath.get(summary, '/employment-summary/organization/name')
+    return dpath.get(summary, '/employment-summary/organization/name', default=None)
 
 
 def get_affiliation_rors(data):
     affiliations = []
-    for affiliation in dpath.get(data, '/activities-summary/employments/affiliation-group'):
+    for affiliation in dpath.get(data, '/activities-summary/employments/affiliation-group', default=[]):
         for summary in affiliation.get('summaries'):
-            if dpath.get(summary, '/employment-summary/end-date') is None:
+            if dpath.get(summary, '/employment-summary/end-date', default=None) is None:
                 affiliations.append(get_affiliation_ror(summary))
     return affiliations
 
@@ -203,38 +217,48 @@ def get_affiliation_ror(summary):
 
 def search_wikidata(ringgold_id):
     url = getattr(settings, 'WIKIDATA_PROVIDER_URL', 'https://www.wikidata.org/w/api.php')
-    headers = getattr(settings, 'WIKIDATA_PROVIDER_HEADERS', {})
+    headers = getattr(settings, 'ORCID_PROVIDER_HEADERS', {})
 
-    entity_response = requests.get(
-        url,
-        params={
-            'action': 'query',
-            'list': 'search',
-            'srsearch': f'haswbstatement:P3500={ringgold_id}',
-            'format': 'json',
-        },
-        headers=headers,
-    )
-    entity_response.raise_for_status()
-    entity_response_data = entity_response.json()
+    # wikidata requires a user agent, see https://meta.wikimedia.org/wiki/User-Agent_policy
+    if not headers.get('User-Agent'):
+        return None
+
+    try:
+        entity_response = requests.get(
+            url,
+            params={
+                'action': 'query',
+                'list': 'search',
+                'srsearch': f'haswbstatement:P3500={ringgold_id}',
+                'format': 'json',
+            },
+            headers=headers,
+        )
+        entity_response.raise_for_status()
+        entity_response_data = entity_response.json()
+    except requests.exceptions.RequestException:
+        return None
 
     try:
         entity = dpath.get(entity_response_data, '/query/search/0/title')
     except KeyError:
         return None
 
-    ror_response = requests.get(
-        url,
-        params={
-            'action': 'wbgetclaims',
-            'entity': entity,
-            'property': 'P6782',
-            'format': 'json',
-        },
-        headers=headers,
-    )
-    ror_response.raise_for_status()
-    ror_response_data = ror_response.json()
+    try:
+        ror_response = requests.get(
+            url,
+            params={
+                'action': 'wbgetclaims',
+                'entity': entity,
+                'property': 'P6782',
+                'format': 'json',
+            },
+            headers=headers,
+        )
+        ror_response.raise_for_status()
+        ror_response_data = ror_response.json()
+    except requests.exceptions.RequestException:
+        return None
 
     try:
         return dpath.get(ror_response_data, '/claims/P6782/0/mainsnak/datavalue/value')
@@ -244,14 +268,18 @@ def search_wikidata(ringgold_id):
 
 def search_ror(disambiguation_id):
     url = getattr(settings, 'ROR_PROVIDER_URL', 'https://api.ror.org/v2/').rstrip('/')
-    headers = getattr(settings, 'ROR_PROVIDER_HEADERS', {})
-    response = requests.get(
-        f'{url}/organizations',
-        params={'query': disambiguation_id},
-        headers=headers,
-    )
-    response.raise_for_status()
-    response_data = response.json()
+    headers = getattr(settings, 'ORCID_PROVIDER_HEADERS', {})
+
+    try:
+        response = requests.get(
+            f'{url}/organizations',
+            params={'query': disambiguation_id},
+            headers=headers,
+        )
+        response.raise_for_status()
+        response_data = response.json()
+    except requests.exceptions.RequestException:
+        return None
 
     try:
         return dpath.get(response_data, '/items/0/id').replace('https://ror.org/', '')
