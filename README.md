@@ -64,3 +64,9 @@ ORCID_PROVIDER_HEADERS = {
     'User-Agent': 'rdmo.example.com/1.0 (mail@rdmo.example.com) rdmo-plugins-orcid/1.0'
 }
 ```
+
+The handler which updates the other values can be customized by creating a subclass of `rdmo_orcid.handlers.OrcidHandler` and adding its python dot path to your settings, e.g.:
+
+```python
+ORCID_HANDLER = 'my_app.handlers.MyOrcidHandler'
+```
