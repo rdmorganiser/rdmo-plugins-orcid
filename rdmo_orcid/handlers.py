@@ -26,13 +26,6 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
     if not instance.external_id or not instance.attribute_id:
         return
 
-    # prefetch catalog
-    catalog = instance.project.catalog
-    catalog.prefetch_elements()
-
-    # compute answer_tree
-    answer_tree = instance.project.get_answer_tree(verbose='question')
-
     # loop over ORCID_PROVIDER_MAP and check if the value instance attribute is found
     for attribute_map in settings.ORCID_PROVIDER_MAP:
         if 'orcid' in attribute_map and instance.attribute.uri == attribute_map['orcid']:
@@ -48,6 +41,13 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
                 data = response.json()
             except (requests.exceptions.RequestException, requests.exceptions.HTTPError):
                 return
+
+            # prefetch catalog
+            catalog = instance.project.catalog
+            catalog.prefetch_elements()
+
+            # compute answer_tree
+            answer_tree = instance.project.get_answer_tree(verbose='question')
 
             if 'given_name' in attribute_map:
                 attribute = Attribute.objects.get(uri=attribute_map['given_name'])
