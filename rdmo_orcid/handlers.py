@@ -52,7 +52,7 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
             if 'given_name' in attribute_map:
                 attribute = Attribute.objects.get(uri=attribute_map['given_name'])
                 if question := find_question(catalog, attribute):
-                    if value_set := find_set(answer_tree, question):
+                    if value_set := find_set(answer_tree, question, instance):
                         Value.objects.update_or_create(
                             project=instance.project,
                             snapshot=None,
@@ -67,7 +67,7 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
             if 'family_name' in attribute_map:
                 attribute = Attribute.objects.get(uri=attribute_map['family_name'])
                 if question := find_question(catalog, attribute):
-                    if value_set := find_set(answer_tree, question):
+                    if value_set := find_set(answer_tree, question, instance):
                         Value.objects.update_or_create(
                             project=instance.project,
                             snapshot=None,
@@ -82,7 +82,7 @@ def orcid_handler(signal, sender, instance=None, **kwargs):
             if 'affiliation' in attribute_map:
                 attribute = Attribute.objects.get(uri=attribute_map['affiliation'])
                 if question := find_question(catalog, attribute):
-                    if value_set := find_set(answer_tree, question):
+                    if value_set := find_set(answer_tree, question, instance):
                         affiliations = []
                         for affiliation in dpath.get(data, '/activities-summary/employments/affiliation-group'):
                             for summaries in affiliation.get('summaries'):
