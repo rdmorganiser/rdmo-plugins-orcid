@@ -25,17 +25,18 @@ class OrcidHandler:
         if not getattr(settings, 'ORCID_PROVIDER_MAP', None):
             return
 
-        # check if this value instance has an external_id or has an attribute (it may have been deleted)
-        if not instance.external_id or not instance.attribute_id:
+        # check if this value instance has an attribute (it may have been deleted)
+        if not instance.attribute_id:
             return
 
         # loop over ORCID_PROVIDER_MAP and check if the value instance attribute is found
         for attribute_map in settings.ORCID_PROVIDER_MAP:
             if 'orcid' in attribute_map and instance.attribute.uri == attribute_map['orcid']:
-                # query the orcid api for the record for this orcid
-                data = self.fetch_orcid_data(instance.external_id)
-                if data is None:
-                    return
+                if instance.external_id:
+                    # query the orcid api for the record for this orcid
+                    data = self.fetch_orcid_data(instance.external_id)
+                    if data is None:
+                        return
 
                 self.instance = instance
 
@@ -46,17 +47,31 @@ class OrcidHandler:
                 # compute answer_tree
                 self.answer_tree = instance.project.get_answer_tree(verbose='question')
 
-                if 'given_name' in attribute_map:
-                    self.save_value(attribute_map['given_name'], self.get_given_name(data))
+                if instance.external_id:
+                    if 'given_name' in attribute_map:
+                        self.save_value(attribute_map['given_name'], self.get_given_name(data))
 
-                if 'family_name' in attribute_map:
-                    self.save_value(attribute_map['family_name'], self.get_family_name(data))
+                    if 'family_name' in attribute_map:
+                        self.save_value(attribute_map['family_name'], self.get_family_name(data))
 
-                if 'affiliation_name' in attribute_map:
-                    self.save_values(attribute_map['affiliation_name'], self.get_affiliation_names(data))
+                    if 'affiliation_name' in attribute_map:
+                        self.save_values(attribute_map['affiliation_name'], self.get_affiliation_names(data))
 
-                if 'affiliation_ror' in attribute_map:
-                    self.save_values(attribute_map['affiliation_ror'], self.get_affiliation_rors(data))
+                    if 'affiliation_ror' in attribute_map:
+                        self.save_values(attribute_map['affiliation_ror'], self.get_affiliation_rors(data))
+                else:
+                    # the orcid was erased, the other values are kept, but can be edited again
+                    if 'given_name' in attribute_map:
+                        self.unlock_value(attribute_map['given_name'])
+
+                    if 'family_name' in attribute_map:
+                        self.unlock_value(attribute_map['family_name'])
+
+                    if 'affiliation_name' in attribute_map:
+                        self.unlock_values(attribute_map['affiliation_name'])
+
+                    if 'affiliation_ror' in attribute_map:
+                        self.unlock_values(attribute_map['affiliation_ror'])
 
     def save_value(self, attribute_uri, text):
         attribute = Attribute.objects.get(uri=attribute_uri)
@@ -70,6 +85,7 @@ class OrcidHandler:
                     set_index=value_set.get('set_index'),
                     defaults={
                         'text': text,
+                        'read_only': True,
                     },
                 )
 
@@ -80,10 +96,6 @@ class OrcidHandler:
             return
 
         parent = find_parent(self.catalog, question)
-
-        # if the question of the instance is inside the parent, the sets of the parent belong to different entities
-        instance_question = find_question(self.catalog, self.instance.attribute)
-        create_parent_sets = parent and parent.is_collection and instance_question not in parent.descendants
 
         if question.is_collection:
             # the question is a collection: every text gets its own collection_index
@@ -99,6 +111,7 @@ class OrcidHandler:
                             collection_index=collection_index,
                             defaults={
                                 'text': text,
+                                'read_only': True,
                             },
                         )
 
@@ -113,7 +126,7 @@ class OrcidHandler:
                     collection_index__in=[collection_index for collection_index, text in enumerate(texts) if text],
                 ).delete()
 
-        elif create_parent_sets:
+        elif self.has_parent_sets(parent):
             # the parent is a collection: every text gets its own set of the parent,
             # we look for the set containing the parent, since the parent might not have any sets yet
             if value_set := find_set(self.answer_tree, parent, self.instance):
@@ -129,6 +142,7 @@ class OrcidHandler:
                             set_index=set_index,
                             defaults={
                                 'text': text,
+                                'read_only': True,
                             },
                         )
 
@@ -146,6 +160,43 @@ class OrcidHandler:
             # neither is a collection: only the first text is stored
             if texts and texts[0]:
                 self.save_value(attribute_uri, texts[0])
+
+    def unlock_value(self, attribute_uri):
+        attribute = Attribute.objects.get(uri=attribute_uri)
+        if question := find_question(self.catalog, attribute):
+            if value_set := find_set(self.answer_tree, question, self.instance):
+                Value.objects.filter(
+                    project=self.instance.project,
+                    snapshot=None,
+                    attribute=attribute,
+                    set_prefix=value_set.get('set_prefix'),
+                    set_index=value_set.get('set_index'),
+                ).update(read_only=False)
+
+    def unlock_values(self, attribute_uri):
+        attribute = Attribute.objects.get(uri=attribute_uri)
+        question = find_question(self.catalog, attribute)
+        if question is None:
+            return
+
+        parent = find_parent(self.catalog, question)
+
+        if not question.is_collection and self.has_parent_sets(parent):
+            # the values were stored in the sets of the parent
+            if value_set := find_set(self.answer_tree, parent, self.instance):
+                Value.objects.filter(
+                    project=self.instance.project,
+                    snapshot=None,
+                    attribute=attribute,
+                    set_prefix=get_child_prefix(value_set),
+                ).update(read_only=False)
+        else:
+            self.unlock_value(attribute_uri)
+
+    def has_parent_sets(self, parent):
+        # if the question of the instance is inside the parent, the sets of the parent belong to different entities
+        instance_question = find_question(self.catalog, self.instance.attribute)
+        return parent and parent.is_collection and instance_question not in parent.descendants
 
     def fetch_orcid_data(self, orcid):
         url = getattr(settings, 'ORCID_PROVIDER_URL', 'https://pub.orcid.org/v3.0/').rstrip('/')
